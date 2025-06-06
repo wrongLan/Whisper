@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Transcription App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        .transcript {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            white-space: pre-wrap;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+        .loading {
+            display: none;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Audio Transcription App</h1>
+        <form id="uploadForm">
+            <input type="file" id="audioFile" accept="audio/*" required>
+            <button type="submit">Transcribe</button>
+        </form>
+        <div id="loading" class="loading">Transcribing... Please wait...</div>
+        <div id="error" class="error"></div>
+        <div id="transcript" class="transcript"></div>
+    </div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('audioFile');
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            const transcript = document.getElementById('transcript');
+            
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            
+            error.textContent = '';
+            transcript.textContent = '';
+            loading.style.display = 'block';
+            
+            try {
+                const response = await fetch('/transcribe', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    error.textContent = data.error;
+                } else {
+                    transcript.textContent = data.transcript;
+                }
+            } catch (err) {
+                error.textContent = 'An error occurred during transcription.';
+            } finally {
+                loading.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
